@@ -175,8 +175,16 @@ def analyze(filename: str, graph: bool):
 
         # Plot with pyvis to html
         for g in goroutines:
-            graph.nodes[g.id]['label'] = f"{g.id}"
-            graph.nodes[g.id]['title'] = f"{g.id}: [{g.waiting_for}]\n{g.stack2[-1]}\n{g.stack2[0]}"
+            # print the stack trace to string, separated by newlines
+            stack2 = "\n".join(g.stack2)
+
+            # get the last element of stack2, only the part after the last /
+            shortname = g.stack2[-1].split("/")[-1]
+
+            # set the label to the last part of the stack trace
+            graph.nodes[g.id]['label'] = f"{shortname}\n[{g.waiting_for}]"
+            graph.nodes[g.id]['title'] = f"{g.id}: [{g.waiting_for}]\n{stack2}"
+            graph.nodes[g.id]['shape'] = 'box'
 
         net = Network(
             directed = True,
