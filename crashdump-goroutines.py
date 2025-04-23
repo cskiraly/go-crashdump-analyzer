@@ -67,8 +67,8 @@ from pyvis.network import Network
 class Goroutine:
     def __init__(self, id: int, waiting_for: str):
         self.id = id
+        self.lines = []
         self.stack = []
-        self.stack2 = []
         self.waiting_for = waiting_for
         self.created_by = None
 
@@ -107,10 +107,10 @@ def parse_crash_dump(file_path: str) -> List[Goroutine]:
             if match:
                 created_by_id = int(match.group(2))
                 current_goroutine.created_by = created_by_id
-                current_goroutine.stack2.append(match.group(1))
+                current_goroutine.stack.append(match.group(1))
         elif line.startswith("\t"):
             # Extract the stack trace information
-            current_goroutine.stack.append(line.strip())
+            current_goroutine.lines.append(line.strip())
         elif line == "":
             # Empty line indicates the end of a goroutine
             if current_goroutine:
@@ -118,7 +118,7 @@ def parse_crash_dump(file_path: str) -> List[Goroutine]:
                 current_goroutine = None
         else:
             # Extract the stack trace information
-            current_goroutine.stack2.append(line.strip())
+            current_goroutine.stack.append(line.strip())
 
     if current_goroutine:
         goroutines.append(current_goroutine)
@@ -133,12 +133,12 @@ def print_goroutines(goroutines: List[Goroutine]):
             print(f"Waiting for: {g.waiting_for}")
         if g.created_by:
             print(f"Created by: {g.created_by}")
-        print("Stack Trace:")
-        for line in g.stack:
+        print("Lines:")
+        for line in g.lines:
             print(f"  {line}")
-        if g.stack2:
-            print("Stack Trace 2:")
-            for line in g.stack2:
+        if g.stack:
+            print("Stack Trace:")
+            for line in g.stack:
                 print(f"  {line}")
         print()
 
@@ -164,7 +164,7 @@ def analyze(filename: str, graph: bool):
         # Set node labels
         labeldict = {}
         for g in goroutines:
-            labeldict[g.id] = f"{g.id}: [{g.waiting_for}]\n{g.stack2[-1]}\n{g.stack2[0]}"
+            labeldict[g.id] = f"{g.id}: [{g.waiting_for}]\n{g.stack[-1]}\n{g.stack[0]}"
 
         # Draw the graph to pdf
         plt.figure(figsize=(64, 128))
@@ -176,14 +176,14 @@ def analyze(filename: str, graph: bool):
         # Plot with pyvis to html
         for g in goroutines:
             # print the stack trace to string, separated by newlines
-            stack2 = "\n".join(g.stack2)
+            stack = "\n".join(g.stack)
 
             # get the last element of stack2, only the part after the last /
-            shortname = g.stack2[-1].split("/")[-1]
+            shortname = g.stack[-1].split("/")[-1]
 
             # set the label to the last part of the stack trace
             graph.nodes[g.id]['label'] = f"{shortname}\n[{g.waiting_for}]"
-            graph.nodes[g.id]['title'] = f"{g.id}: [{g.waiting_for}]\n{stack2}"
+            graph.nodes[g.id]['title'] = f"{g.id}: [{g.waiting_for}]\n{stack}"
             graph.nodes[g.id]['shape'] = 'box'
 
         net = Network(
