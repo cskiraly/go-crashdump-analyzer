@@ -173,17 +173,31 @@ def analyze(filename: str, graph: bool):
         plt.title("Goroutine Relationships")
         plt.savefig("goroutine_graph.pdf", format="pdf")
 
+
         # Plot with pyvis to html
+        def line_to_link(line):
+            # convert the line to a link, e.g.
+            # line: "github.com/ethereum/go-ethereum/p2p/server.go:958 +0xd1"
+            # link: "https://github.com/ethereum/go-ethereum/blob/master/p2p/server.go#L958"
+            match = re.search(r'github.com/([^/]+)/([^/]+)/(.+):(\d+)', line)
+            if match:
+                org = match.group(1)
+                repo = match.group(2)
+                filepath = match.group(3)
+                lineno = match.group(4)
+                return f"https://github.com/{org}/{repo}/blob/master/{filepath}#L{lineno}"
+
         for g in goroutines:
             # print the stack trace to string, separated by newlines
-            stack = "\n".join(g.stack)
+            links = [f'<a href="{line_to_link(line)}">{g.stack[i]}</a>' for i, line in enumerate(g.lines)]
+            stack = "<br/>".join(links)
 
             # get the last element of stack2, only the part after the last /
             shortname = g.stack[-1].split("/")[-1]
 
             # set the label to the last part of the stack trace
             graph.nodes[g.id]['label'] = f"{shortname}\n[{g.waiting_for}]"
-            graph.nodes[g.id]['title'] = f"{g.id}: [{g.waiting_for}]\n{stack}"
+            graph.nodes[g.id]['title'] = f"{g.id}: [{g.waiting_for}]<br/>{stack}"
             graph.nodes[g.id]['shape'] = 'box'
 
         net = Network(
