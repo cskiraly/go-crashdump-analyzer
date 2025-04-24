@@ -232,6 +232,32 @@ def analyze(logfile: str, output: str, verbose: bool, savefile: str, linktarget:
         graph.nodes[g.id]['title'] = f"{g.id}: [{g.waiting_for}]<br/>{stack}"
         graph.nodes[g.id]['shape'] = 'box'
 
+        # color the nodes according to the waiting_for reason
+        if g.waiting_for:
+            if g.waiting_for == "chan receive":
+                graph.nodes[g.id]['color'] = 'lightblue'
+            elif g.waiting_for.startswith("select"):
+                graph.nodes[g.id]['color'] = 'lightgreen'
+            elif g.waiting_for == "runnable":
+                graph.nodes[g.id]['color'] = 'lightyellow'
+            elif g.waiting_for == "IO wait":
+                graph.nodes[g.id]['color'] = 'lightgray'
+            elif g.waiting_for == "sleep":
+                graph.nodes[g.id]['color'] = 'lightcoral'
+            elif g.waiting_for == "sync.Cond.Wait":
+                graph.nodes[g.id]['color'] = 'lightcyan'
+            elif g.waiting_for == "sync.Mutex.Lock":
+                graph.nodes[g.id]['color'] = 'blue'
+            elif g.waiting_for.startswith("chan receive"):
+                graph.nodes[g.id]['color'] = 'orange'
+            elif g.waiting_for == "chan receive (nil chan)":
+                graph.nodes[g.id]['color'] = 'darkorange'
+            elif g.waiting_for.startswith("chan send"):
+                graph.nodes[g.id]['color'] = 'red'
+
+            else:
+                graph.nodes[g.id]['color'] = 'lightpink'
+
     net = Network(
         directed = True,
         select_menu = True, # Show part 1 in the plot (optional)
