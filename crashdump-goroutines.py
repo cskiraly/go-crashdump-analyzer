@@ -181,17 +181,31 @@ def analyze(logfile: str, output: str, verbose: bool, savefile: str, linktarget:
         # convert the line to a link, e.g.
         # line: "github.com/ethereum/go-ethereum/p2p/server.go:958 +0xd1"
         # link: "https://github.com/ethereum/go-ethereum/blob/master/p2p/server.go#L958"
-        match = re.search(r'github.com/([^/]+)/([^/]+)/(.+):(\d+)', line)
+        match = re.search(r'github.com/([^/]+)/([^/@]+)(@[^/]+)?/(.+):(\d+)', line)
         if match:
             org = match.group(1)
             repo = match.group(2)
-            filepath = match.group(3)
-            lineno = match.group(4)
-            return f"https://github.com/{org}/{repo}/blob/master/{filepath}#L{lineno}"
+            version = match.group(3)
+            filepath = match.group(4)
+            lineno = match.group(5)
+
+            if version:
+                branch = version[1:]
+            else:
+                branch = 'master'
+            return f"https://github.com/{org}/{repo}/blob/{branch}/{filepath}#L{lineno}"
+
+    def line_to_linkedline(stackline, codeline, linktarget):
+        link = line_to_link(codeline)
+        if link:
+            return f'<a href="{link}" target="{linktarget}">{stackline}</a>'
+        else:
+            return stackline
 
     for g in goroutines:
         # print the stack trace to string, separated by newlines
         links = [f'<a href="{line_to_link(line)}" target={linktarget}>{g.stack[i]}</a>' for i, line in enumerate(g.lines)]
+        links = [line_to_linkedline(g.stack[i], line, linktarget) for i, line in enumerate(g.lines)]
         stack = "<br/>".join(links)
 
         # get the last element of stack2, only the part after the last /
