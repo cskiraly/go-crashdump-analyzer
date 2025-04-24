@@ -15,10 +15,11 @@ pip install -r requirements.txt
 Run the analyzer with a crash dump file:
 
 ```bash
-./go-crashdump-analyzer <path-to-crash-dump-log> [--graph]
+python crashdump-goroutines.py <crash_dump_file> [-v] [-s <extra_output_file>]
 ```
 
 Open the generated `goroutine_graph.html` with a browser.
+Optionally, specify another static output file with `-s`, e.g. `-s goroutines.svg`.
 
 ## License
 
