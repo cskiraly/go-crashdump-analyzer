@@ -108,14 +108,14 @@ def parse_crash_dump(file_path: str) -> List[Goroutine]:
                 created_by_id = int(match.group(2))
                 current_goroutine.created_by = created_by_id
                 current_goroutine.stack.append(match.group(1))
-        elif line.startswith("\t"):
-            # Extract the stack trace information
-            current_goroutine.lines.append(line.strip())
-        elif line == "":
+        elif line.strip() == "":
             # Empty line indicates the end of a goroutine
             if current_goroutine:
                 goroutines.append(current_goroutine)
                 current_goroutine = None
+        elif line.startswith(('\t', ' ')):
+            # Extract the stack trace information
+            current_goroutine.lines.append(line.strip())
         else:
             # Extract the stack trace information
             current_goroutine.stack.append(line.strip())
