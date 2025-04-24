@@ -148,6 +148,20 @@ def analyze(logfile: str, output: str, verbose: bool, savefile: str, linktarget:
     if verbose:
         print_goroutines(goroutines)
 
+    # collect statistics about waiting_for reasons:
+    waiting_for_count = {}
+    for g in goroutines:
+        if g.waiting_for:
+            if g.waiting_for not in waiting_for_count:
+                waiting_for_count[g.waiting_for] = 0
+            waiting_for_count[g.waiting_for] += 1
+    # sort according to the count
+    waiting_for_count = dict(sorted(waiting_for_count.items(), key=lambda item: item[1], reverse=True))
+    # print the waiting_for reasons
+    print("Waiting for reasons:")
+    for reason, count in waiting_for_count.items():
+        print(f"  {reason}: {count}")
+
     # Create a directed graph
     graph = nx.DiGraph()
     # Add nodes for each goroutine
