@@ -208,8 +208,10 @@ def analyze(logfile: str, output: str, verbose: bool, savefile: str, linktarget:
         links = [line_to_linkedline(g.stack[i], line, linktarget) for i, line in enumerate(g.lines)]
         stack = "<br/>".join(links)
 
-        # get the last element of stack2, only the part after the last /
-        shortname = g.stack[-1].split("/")[-1]
+        # get the first and last element of stack, only the part after the last /
+        shortname = g.stack[0].split("/")[-1]
+        if len(g.stack) > 1:
+            shortname += "\n"+g.stack[-1].split("/")[-1]
 
         # set the label to the last part of the stack trace
         graph.nodes[g.id]['label'] = f"{shortname}\n[{g.waiting_for}]"
