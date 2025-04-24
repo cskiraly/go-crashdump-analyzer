@@ -218,7 +218,6 @@ def analyze(logfile: str, output: str, verbose: bool, savefile: str, linktarget:
 
     for g in goroutines:
         # print the stack trace to string, separated by newlines
-        links = [f'<a href="{line_to_link(line)}" target={linktarget}>{g.stack[i]}</a>' for i, line in enumerate(g.lines)]
         links = [line_to_linkedline(g.stack[i], line, linktarget) for i, line in enumerate(g.lines)]
         stack = "<br/>".join(links)
 
@@ -276,7 +275,7 @@ if __name__ == "__main__":
     parser.add_argument('logfile', help='Path to the crash dump log file')
     parser.add_argument('-o', '--output', default='goroutine_graph.html', help='Output file for the graph (default: goroutine_graph.html)')
     parser.add_argument('-v', '--verbose', action='store_true', help='Print more goroutine info on stdout')
-    parser.add_argument('-s', '--savefile', help='Generate a static graph of goroutines in a file (youfile.(svg|pdf|png))')
+    parser.add_argument('-s', '--savefile', help='Generate a static graph of goroutines in a file (yourfile.(svg|pdf|png))')
     parser.add_argument('-l', '--linktarget', default='_blank', help='browser target for opening source links (default: _blank)')
     args = parser.parse_args()
 
