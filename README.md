@@ -2,6 +2,8 @@
 
 A simple tool to visualize the state, stack trace, a dependency graph of goroutines.
 
+![Go Crashdump Analyzer UI](images/go-crashdump-analyzer.png?raw=true "Go Crashdump Analyzer UI")
+
 ## Installation
 
 ```bash
